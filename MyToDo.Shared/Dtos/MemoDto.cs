@@ -4,12 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace WpfMyToDo.Common.Models
+namespace MyToDo.Shared.Dtos
 {
     /// <summary>
-    /// 待办事项数据实体
+    /// 备忘录数据实体
     /// </summary>
-    public class ToDoDto : BaseDto
+    public class MemoDto : BaseDto
     {
         private string title;
         private string content;
@@ -18,19 +18,13 @@ namespace WpfMyToDo.Common.Models
         public string Title
         {
             get { return title; }
-            set { title = value;  }
+            set { title = value; OnPropertyChanged(); }
         }
 
         public string Content
         {
             get { return content; }
-            set { content = value;  }
-        }
-
-        public int Status
-        {
-            get { return status; }
-            set { status = value;  }
+            set { content = value; OnPropertyChanged(); }
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Prism.Events;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -11,6 +12,8 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using WpfMyToDo.Common;
+using WpfMyToDo.Extensions;
 
 namespace WpfMyToDo.Views
 {
@@ -19,9 +22,25 @@ namespace WpfMyToDo.Views
     /// </summary>
     public partial class MainView : Window
     {
-        public MainView()
+        public MainView(IEventAggregator aggregator, IDialogHostService dialogHostService)
         {
             InitializeComponent();
+
+            //注册等待消息窗口
+            aggregator.Resgiter(arg =>
+            {
+                DialogHost.IsOpen = arg.IsOpen;
+
+                if (DialogHost.IsOpen)  
+                    DialogHost.DialogContent = new ProgressView();
+            });
+            //注册 全局 提示消息
+            aggregator.ResgiterMessage(arg =>
+            {
+                Snackbar.MessageQueue.Enqueue(arg.Message);
+            });
+
+          
 
             //最小化事件
             btnMin.Click += (s, e) => { this.WindowState = WindowState.Minimized; };
@@ -38,7 +57,11 @@ namespace WpfMyToDo.Views
                 }
             };
             //关闭窗口事件
-            btnClose.Click += (s, e) => { this.Close(); };
+            btnClose.Click += async (s, e) => {
+                //退出系统前,询问窗口
+                var dialogResult = await dialogHostService.Question("温馨提示", "确认退出系统?");
+                if (dialogResult.Result != Prism.Services.Dialogs.ButtonResult.OK) return;
+                this.Close(); };
             //窗口可拖拽事件 DragMove(拖拽移动)
             ColorZone.MouseMove += (s, e) =>
             {

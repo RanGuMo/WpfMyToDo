@@ -1,4 +1,5 @@
 ﻿using Prism.Commands;
+using Prism.Ioc;
 using Prism.Mvvm;
 using Prism.Regions;
 using System;
@@ -7,14 +8,27 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using WpfMyToDo.Common;
 using WpfMyToDo.Common.Models;
 using WpfMyToDo.Extensions;
 
 namespace WpfMyToDo.ViewModels
 {
-    public class MainViewModel :BindableBase
+    public class MainViewModel :BindableBase, IConfigureService
     {
+        private string userName;
 
+        public string UserName
+        {
+            get { return userName; }
+            set { userName = value; RaisePropertyChanged(); }
+        }
+        private ObservableCollection<MenuBar> menuBars;
+        public ObservableCollection<MenuBar> MenuBars
+        {
+            get { return menuBars; }
+            set { menuBars = value; RaisePropertyChanged(); }
+        }
         /// <summary>
         /// 导航命令
         /// </summary>
@@ -32,26 +46,21 @@ namespace WpfMyToDo.ViewModels
         /// 导航前进
         /// </summary>
         public DelegateCommand GoForwardCommand { get; private set; }
+        /// <summary>
+        /// 注销命令
+        /// </summary>
+        public DelegateCommand LoginOutCommand { get; private set; }
 
-
-
-
-        private ObservableCollection<MenuBar> menuBars;
         private readonly IRegionManager regionManager;
+        private readonly IContainerProvider containerProvider;
+       
 
-        public ObservableCollection<MenuBar> MenuBars
-        {
-            get { return menuBars; }
-            set { menuBars = value; RaisePropertyChanged(); }
-        }
-
-        public MainViewModel(IRegionManager regionManager)
+        public MainViewModel(IContainerProvider containerProvider, IRegionManager regionManager)
         {
             MenuBars = new ObservableCollection<MenuBar>();
-            CreateMenuBar();
             NavigateCommand = new DelegateCommand<MenuBar>(Navigate);
             this.regionManager = regionManager;
-
+            this.containerProvider = containerProvider;
             //后退
             GoBackCommand = new DelegateCommand(() =>
             {
@@ -65,6 +74,12 @@ namespace WpfMyToDo.ViewModels
             {
                 if (journal != null &&  journal.CanGoForward)
                     journal.GoForward();
+            });
+
+            LoginOutCommand = new DelegateCommand(() =>
+            {
+                //注销当前用户
+                App.LoginOut(containerProvider);
             });
 
 
@@ -93,16 +108,14 @@ namespace WpfMyToDo.ViewModels
             MenuBars.Add(new MenuBar() { Icon = "NotebookPlus", Title = "备忘录", NameSpace = "MemoView" });
             MenuBars.Add(new MenuBar() { Icon = "Cog", Title = "设置", NameSpace = "SettingsView" });
         }
-
-
-
-
-
-
-
-
-
-
-
+        /// <summary>
+        /// 配置首页初始化参数
+        /// </summary>
+        public void Configure()
+        {
+            UserName = AppSession.UserName;
+            CreateMenuBar();
+            regionManager.Regions[PrismManager.MainViewRegionName].RequestNavigate("IndexView");
+        }
     }
 }

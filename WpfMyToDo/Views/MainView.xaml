@@ -5,7 +5,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:ext="clr-namespace:WpfMyToDo.Extensions"
     xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
-    xmlns:local="clr-namespace:WpfMyToDo"
+    xmlns:local="clr-namespace:WpfMyToDo.Views"
     xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:prism="http://prismlibrary.com/"
@@ -25,12 +25,13 @@
     WindowStyle="None"
     mc:Ignorable="d">
     <materialDesign:DialogHost
+        x:Name="DialogHost"
         DialogTheme="Inherit"
-        Identifier="RootDialog"
-        SnackbarMessageQueue="{Binding ElementName=MainSnackbar, Path=MessageQueue}">
+        Identifier="Root">
 
         <materialDesign:DrawerHost x:Name="drawerHost" IsLeftDrawerOpen="{Binding ElementName=MenuToggleButton, Path=IsChecked}">
             <materialDesign:DrawerHost.LeftDrawerContent>
+
                 <DockPanel MinWidth="220">
                     <StackPanel Margin="0,20" DockPanel.Dock="Top">
                         <!--  头像  -->
@@ -49,7 +50,8 @@
                         <TextBlock
                             Margin="0,10"
                             HorizontalAlignment="Center"
-                            Text="RanGuMo" />
+                            d:Text="RanGuMo"
+                            Text="{Binding UserName}" />
 
 
                     </StackPanel>
@@ -61,7 +63,7 @@
                         ItemsSource="{Binding MenuBars}">
                         <i:Interaction.Triggers>
                             <i:EventTrigger EventName="SelectionChanged">
-                                <i:InvokeCommandAction Command="{Binding NavigateCommand}" CommandParameter="{Binding ElementName=menuBar,Path=SelectedItem}" />
+                                <i:InvokeCommandAction Command="{Binding NavigateCommand}" CommandParameter="{Binding SelectedItem, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListBox}}" />
                             </i:EventTrigger>
                         </i:Interaction.Triggers>
                         <ListBox.ItemTemplate>
@@ -84,7 +86,17 @@
                 </DockPanel>
             </materialDesign:DrawerHost.LeftDrawerContent>
 
-            <DockPanel>
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="auto" />
+                    <RowDefinition />
+                </Grid.RowDefinitions>
+
+                <!--  全局提示  -->
+                <materialDesign:Snackbar
+                    x:Name="Snackbar"
+                    Panel.ZIndex="1"
+                    MessageQueue="{materialDesign:MessageQueue}" />
                 <materialDesign:ColorZone
                     x:Name="ColorZone"
                     Padding="16"
@@ -92,18 +104,7 @@
                     Mode="PrimaryMid">
                     <DockPanel LastChildFill="True">
                         <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
-                            <Image
-                                Width="25"
-                                Height="25"
-                                Margin="0,0,20,0"
-                                Source="/Images/user.jpg">
-                                <Image.Clip>
-                                    <EllipseGeometry
-                                        Center="12.5,12.5"
-                                        RadiusX="12.5"
-                                        RadiusY="12.5" />
-                                </Image.Clip>
-                            </Image>
+
                             <Button
                                 x:Name="btnMin"
                                 Content="—"
@@ -117,6 +118,28 @@
                                 Content="✕"
                                 Style="{StaticResource MaterialDesignFlatMidBgButton}" />
                         </StackPanel>
+
+
+                        <materialDesign:PopupBox DockPanel.Dock="Right">
+                            <materialDesign:PopupBox.ToggleContent>
+                                <Image
+                                    Width="25"
+                                    Height="25"
+                                    Source="/Images/user.jpg">
+                                    <Image.Clip>
+                                        <EllipseGeometry
+                                            Center="12.5,12.5"
+                                            RadiusX="12.5"
+                                            RadiusY="12.5" />
+                                    </Image.Clip>
+                                </Image>
+                            </materialDesign:PopupBox.ToggleContent>
+
+                            <StackPanel>
+                                <!--<Button Command="{Binding AppCenterCommand}" Content="个人中心"/>-->
+                                <Button Command="{Binding LoginOutCommand}" Content="注销当前账户" />
+                            </StackPanel>
+                        </materialDesign:PopupBox>
 
                         <StackPanel Orientation="Horizontal">
                             <ToggleButton
@@ -158,8 +181,8 @@
                     </DockPanel>
                 </materialDesign:ColorZone>
 
-                <ContentControl prism:RegionManager.RegionName="{x:Static ext:PrismManager.MainViewRegionName}" />
-            </DockPanel>
+                <ContentControl Grid.Row="1" prism:RegionManager.RegionName="{x:Static ext:PrismManager.MainViewRegionName}" />
+            </Grid>
         </materialDesign:DrawerHost>
     </materialDesign:DialogHost>
 

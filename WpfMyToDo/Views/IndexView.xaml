@@ -3,14 +3,17 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
     xmlns:local="clr-namespace:WpfMyToDo.Views"
     xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+    xmlns:cv="clr-namespace:WpfMyToDo.Common.Converters"
     d:DesignHeight="450"
     d:DesignWidth="800"
-    FontFamily="微软雅黑"
     mc:Ignorable="d">
+    <UserControl.Resources>
+        <cv:IntToBoolConveter x:Key="intToBool"/>
+    </UserControl.Resources>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="auto" />
@@ -18,7 +21,10 @@
             <RowDefinition />
         </Grid.RowDefinitions>
 
-        <TextBlock FontSize="22" Text="hhhhh" />
+        <TextBlock
+            Margin="15,10"
+            FontSize="22"
+            Text="{Binding Title}" />
 
         <ItemsControl Grid.Row="1" ItemsSource="{Binding TaskBars}">
             <ItemsControl.ItemsPanel>
@@ -33,6 +39,12 @@
                         Margin="10"
                         Background="{Binding Color}"
                         CornerRadius="5">
+                        <Border.InputBindings>
+                            <MouseBinding MouseAction="LeftClick"
+                                          Command="{Binding DataContext.NavigateCommand, RelativeSource={RelativeSource Mode=FindAncestor,AncestorType=ItemsControl}}"
+                                          CommandParameter="{Binding}"/>
+                        </Border.InputBindings>
+
                         <Border.Style>
                             <Style TargetType="Border">
                                 <Style.Triggers>
@@ -50,7 +62,7 @@
                             </Style>
                         </Border.Style>
                         <Grid>
-                            <StackPanel Margin="20,20">
+                            <StackPanel Margin="20,10">
                                 <materialDesign:PackIcon
                                     Width="30"
                                     Height="30"
@@ -64,6 +76,7 @@
                                     FontWeight="Bold"
                                     Text="{Binding Content}" />
                             </StackPanel>
+
                             <Canvas ClipToBounds="True">
                                 <Border
                                     Canvas.Top="10"
@@ -82,15 +95,11 @@
                                     CornerRadius="100"
                                     Opacity="0.1" />
                             </Canvas>
-
                         </Grid>
-
                     </Border>
                 </DataTemplate>
             </ItemsControl.ItemTemplate>
         </ItemsControl>
-
-
 
         <Grid Grid.Row="2" Margin="0,10">
             <Grid.ColumnDefinitions>
@@ -113,42 +122,18 @@
                         FontSize="20"
                         FontWeight="Bold"
                         Text="待办事项" />
-                    <Button
+                    <Button  Command="{Binding ExecuteCommand}"
+                             CommandParameter="新增待办"
                         Width="30"
-                        Height="30"
+                        Height="30" 
                         VerticalAlignment="Top"
-                        Command="{Binding ExecuteCommand}"
-                        CommandParameter="新增待办"
                         DockPanel.Dock="Right"
-                        Style="{StaticResource MaterialDesignFloatingActionAccentButton}">
+                        Style="{StaticResource MaterialDesignFloatingActionAccentButton}" Cursor="Hand">
                         <materialDesign:PackIcon Kind="Add" />
                     </Button>
                 </DockPanel>
 
-                <ListBox
-                    HorizontalContentAlignment="Stretch"
-                    ItemsSource="{Binding ToDoDtos}"
-                    ScrollViewer.VerticalScrollBarVisibility="Hidden">
-                    <ListBox.ItemTemplate>
-                        <DataTemplate>
-                            <DockPanel MaxHeight="80" LastChildFill="False">
-                                <ToggleButton DockPanel.Dock="Right" />
-                                <StackPanel>
-                                    <TextBlock
-                                        FontSize="16"
-                                        FontWeight="Bold"
-                                        Text="{Binding Title}" />
-                                    <TextBlock
-                                        Margin="0,5"
-                                        Opacity="0.5"
-                                        Text="{Binding Content}" />
-                                </StackPanel>
-                            </DockPanel>
-                        </DataTemplate>
-                    </ListBox.ItemTemplate>
-                </ListBox>
-
-                <!--<ListBox x:Name="todoList"
+                <ListBox x:Name="todoList"
                     HorizontalContentAlignment="Stretch"
                     ItemsSource="{Binding Summary.ToDoList}"
                     ScrollViewer.VerticalScrollBarVisibility="Hidden">
@@ -160,8 +145,7 @@
                         </i:EventTrigger>
                     </i:Interaction.Triggers>
 
-                -->
-                <!--<ListBox.ItemTemplate>
+                    <ListBox.ItemTemplate>
                         <DataTemplate>
                             <DockPanel MaxHeight="80" LastChildFill="False">
                                 <ToggleButton DockPanel.Dock="Right"
@@ -182,10 +166,10 @@
                             </DockPanel>
 
                         </DataTemplate>
-                    </ListBox.ItemTemplate>-->
-                <!--
-                </ListBox>-->
+                    </ListBox.ItemTemplate>
+                </ListBox>
             </DockPanel>
+
 
             <Border
                 Grid.Column="1"
@@ -206,9 +190,9 @@
                     <Button
                         Width="30"
                         Height="30"
-                        VerticalAlignment="Top"
                         Command="{Binding ExecuteCommand}"
-                        CommandParameter="新增备忘录"
+                             CommandParameter="新增备忘录"
+                        VerticalAlignment="Top"
                         DockPanel.Dock="Right"
                         Style="{StaticResource MaterialDesignFloatingActionAccentButton}">
                         <materialDesign:PackIcon Kind="Add" />
@@ -216,28 +200,6 @@
                 </DockPanel>
 
                 <ListBox
-                    HorizontalContentAlignment="Stretch"
-                    ItemsSource="{Binding MemoDtos}"
-                    ScrollViewer.VerticalScrollBarVisibility="Hidden">
-                    <ListBox.ItemTemplate>
-                        <DataTemplate>
-                            <DockPanel MaxHeight="80" LastChildFill="False">
-                                <ToggleButton DockPanel.Dock="Right" />
-                                <StackPanel>
-                                    <TextBlock
-                                        FontSize="16"
-                                        FontWeight="Bold"
-                                        Text="{Binding Title}" />
-                                    <TextBlock
-                                        Margin="0,5"
-                                        Opacity="0.5"
-                                        Text="{Binding Content}" />
-                                </StackPanel>
-                            </DockPanel>
-                        </DataTemplate>
-                    </ListBox.ItemTemplate>
-                </ListBox>
-                <!--<ListBox
                     x:Name="memoList"
                     ItemsSource="{Binding Summary.MemoList}" ScrollViewer.VerticalScrollBarVisibility="Hidden">
                     <i:Interaction.Triggers>
@@ -260,12 +222,9 @@
                             </StackPanel>
                         </DataTemplate>
                     </ListBox.ItemTemplate>
-                </ListBox>-->
+                </ListBox>
             </DockPanel>
-
-
-
-
         </Grid>
+
     </Grid>
 </UserControl>
